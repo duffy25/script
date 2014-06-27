@@ -7,7 +7,7 @@
 
 
 '''
-backup mysql
+backup mysql script
 
 '''
 
@@ -31,3 +31,16 @@ DBS = Popen(arg, stdout=PIPE, stderr=STDOUT)
 DB = DBS.communicate()[0].split('\n')
 DB_BACKUP = filter(lambda v: v not in DB_IGNORE, DB)
 
+new_list = filter(lambda v: v not in DB_IGNORE, DB)
+
+for db in new_list:
+    f = open("%s/%s.sql" %(BF_PATH,db), 'w')
+    bk_arg = shlex.split("mysqldump -u%s -p%s -h%s -P%s -F %s" % (DB_USER, DB_PASS, DB_HOST, DB_PORT, db))
+    p1 = Popen(bk_arg, stdout=PIPE)
+    for line in p1.stdout:
+        f.write(line)
+    p1.wait()
+    f.close()
+    #p2 = Popen('gzip', stdin=p1.stdout, stdout=f)
+    #p2.wait()
+    print  DBS.communicate()[0]
