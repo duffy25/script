@@ -44,3 +44,4 @@ for db in new_list:
     #p2 = Popen('gzip', stdin=p1.stdout, stdout=f)
     #p2.wait()
     print  DBS.communicate()[0]
+
