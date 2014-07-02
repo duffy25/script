@@ -2,7 +2,7 @@
 #coding=utf8    
 #author : mike duffy
 #mail   : mikeduffy@qq.com
-#source : https://github.com/duffy25/script/blob/master/mysql_backup.py
+#source :https://raw.githubusercontent.com/duffy25/script/master/mysql_backup.py
 #version:1.0
 
 '''
@@ -35,7 +35,10 @@ DEL_TIME =(date.today() + timedelta(days = -abs(BK_COPY))).strftime("%Y%m%d")
 ARG = split("mysql -u%s -p%s -h%s -P%s -e 'show databases'" % (DB_USER, DB_PASS, DB_HOST, DB_PORT))
 DB_ALL = Popen(ARG, stdout=PIPE, stderr=STDOUT)
 DB_ALL.wait()
-DB = DB_ALL.communicate()[0].split('\n')
+p = DB_ALL.communicate()[0]
+if p[:5] == 'ERROR':
+    raise Exception(p)
+DB = p.split('\n')
 DB_BACKUP = filter(lambda v: v not in DB_IGNORE, DB)
 
 print "AVAILABLE_DB: %s" % filter(lambda v: v not in '', DB)
