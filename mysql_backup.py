@@ -31,6 +31,17 @@ GZ = True
 BK_COPY = 7
 DEL_TIME =(date.today() + timedelta(days = -abs(BK_COPY))).strftime("%Y%m%d")
 
+if READ_CONFIG:
+    config = configparser.ConfigParser()
+    config.read(PH_CONFIG)
+    try:
+        DB_USER  = config['mysqldump']['user']
+        DB_PASS  = config['mysqldump']['password']
+        ERR_CONFIG = None
+    except:
+        ERR_CONFIG = True
+        print "READ CONFIG FAILED"
+        raise SystemExit
 
 ARG = split("mysql -u%s -p%s -h%s -P%s -e 'show databases'" % (DB_USER, DB_PASS, DB_HOST, DB_PORT))
 DB_ALL = Popen(ARG, stdout=PIPE, stderr=STDOUT)
@@ -44,17 +55,7 @@ DB_BACKUP = filter(lambda v: v not in DB_IGNORE, DB)
 print "AVAILABLE_DB: %s" % filter(lambda v: v not in '', DB)
 print "BACKUP_DB: %s" % DB_BACKUP
 
-if READ_CONFIG:
-    config = configparser.ConfigParser()
-    config.read(PH_CONFIG)
-    try:
-        DB_USER  = config['mysqldump']['user']
-        DB_PASS  = config['mysqldump']['password']
-        ERR_CONFIG = None
-    except:
-        ERR_CONFIG = True
-        print "READ CONFIG FAILED"
-        raise SystemExit
+
 
 def run_backup():
     for db in DB_BACKUP:
