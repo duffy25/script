@@ -10,13 +10,16 @@ backup mysql script
 '''
 
 # Import module
-import shlex
+from shlex import split
 from subprocess import PIPE, STDOUT, Popen
 from os import path, makedirs, remove
 from time import gmtime, strftime
 from datetime import timedelta, date
+import configparser
 
 # Set the variable
+READ_CONFIG = True
+PH_CONFIG = "/yourpath/my.cnf"
 DB_USER = 'example'
 DB_PASS = 'example'
 DB_HOST = 'localhost'
@@ -29,8 +32,7 @@ BK_COPY = 7
 DEL_TIME =(date.today() + timedelta(days = -abs(BK_COPY))).strftime("%Y%m%d")
 
 
-
-ARG = shlex.split("mysql -u%s -p%s -h%s -P%s -e 'show databases'" % (DB_USER, DB_PASS, DB_HOST, DB_PORT))
+ARG = split("mysql -u%s -p%s -h%s -P%s -e 'show databases'" % (DB_USER, DB_PASS, DB_HOST, DB_PORT))
 DB_ALL = Popen(ARG, stdout=PIPE, stderr=STDOUT)
 DB_ALL.wait()
 DB = DB_ALL.communicate()[0].split('\n')
@@ -39,10 +41,21 @@ DB_BACKUP = filter(lambda v: v not in DB_IGNORE, DB)
 print "AVAILABLE_DB: %s" % filter(lambda v: v not in '', DB)
 print "BACKUP_DB: %s" % DB_BACKUP
 
+if READ_CONFIG:
+    config = configparser.ConfigParser()
+    config.read(PH_CONFIG)
+    try:
+        DB_USER  = config['mysqldump']['user']
+        DB_PASS  = config['mysqldump']['password']
+        ERR_CONFIG = None
+    except:
+        ERR_CONFIG = True
+        print "READ CONFIG FAILED"
+        raise SystemExit
 
 def run_backup():
     for db in DB_BACKUP:
-        bk_arg = shlex.split("mysqldump -u%s -p%s -h%s -P%s -F %s" % (DB_USER, DB_PASS, DB_HOST, DB_PORT, db))
+        bk_arg = split("mysqldump -u%s -p%s -h%s -P%s -F %s" % (DB_USER, DB_PASS, DB_HOST, DB_PORT, db))
         p1 = Popen(bk_arg, stdout=PIPE)
         if GZ:
             f_gz = open("%s/%s_%s.sql.gz" %(PH_BACKUP, db, TM_TODAY), 'wb')
