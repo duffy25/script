@@ -15,7 +15,12 @@ from subprocess import PIPE, STDOUT, Popen
 from os import path, makedirs, remove
 from time import gmtime, strftime
 from datetime import timedelta, date
-import configparser
+try:
+    import configparser
+except:
+    import pip
+    pip.main(configparser)
+    import configparser
 
 # Set the variable
 READ_CONFIG = True
